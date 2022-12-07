@@ -25,6 +25,17 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 	return todo, nil
 }
 
+// CreateJurusan is the resolver for the createJurusan field.
+func (r *mutationResolver) CreateJurusan(ctx context.Context, input model.NewJurusan) (*models.Jurusan, error) {
+	jurusan := &models.Jurusan{
+		Jurusan: input.Jurusan,
+	}
+	fmt.Println(jurusan)
+
+	config.DB.Create(jurusan)
+	return jurusan, nil
+}
+
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	return r.todos, nil

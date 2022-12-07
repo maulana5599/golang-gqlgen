@@ -68,6 +68,11 @@ input NewTodo {
   userId: String!
 }
 
+input NewJurusan {
+  Jurusan: String!
+}
+
 type Mutation {
   createTodo(input: NewTodo!): Todo!
+  createJurusan(input: NewJurusan!): Jurusan!
 }

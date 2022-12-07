@@ -84,7 +84,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateTodo func(childComplexity int, input model.NewTodo) int
+		CreateJurusan func(childComplexity int, input model.NewJurusan) int
+		CreateTodo    func(childComplexity int, input model.NewTodo) int
 	}
 
 	Query struct {
@@ -113,6 +114,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error)
+	CreateJurusan(ctx context.Context, input model.NewJurusan) (*models.Jurusan, error)
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*model.Todo, error)
@@ -280,6 +282,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Link.User(childComplexity), true
 
+	case "Mutation.createJurusan":
+		if e.complexity.Mutation.CreateJurusan == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createJurusan_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateJurusan(childComplexity, args["input"].(model.NewJurusan)), true
+
 	case "Mutation.createTodo":
 		if e.complexity.Mutation.CreateTodo == nil {
 			break
@@ -403,6 +417,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputNewJurusan,
 		ec.unmarshalInputNewTodo,
 	)
 	first := true
@@ -534,8 +549,13 @@ input NewTodo {
   userId: String!
 }
 
+input NewJurusan {
+  Jurusan: String!
+}
+
 type Mutation {
   createTodo(input: NewTodo!): Todo!
+  createJurusan(input: NewJurusan!): Jurusan!
 }
 `, BuiltIn: false},
 }
@@ -544,6 +564,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createJurusan_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.NewJurusan
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewJurusan2githubᚗcomᚋmaulana5599ᚋgolangᚑgqlgenᚋgraphᚋmodelᚐNewJurusan(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1592,6 +1627,69 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createTodo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createJurusan(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createJurusan(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateJurusan(rctx, fc.Args["input"].(model.NewJurusan))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Jurusan)
+	fc.Result = res
+	return ec.marshalNJurusan2ᚖgithubᚗcomᚋmaulana5599ᚋgolangᚑgqlgenᚋmodelsᚐJurusan(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createJurusan(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Jurusan_id(ctx, field)
+			case "jurusan":
+				return ec.fieldContext_Jurusan_jurusan(ctx, field)
+			case "jurusan_detail":
+				return ec.fieldContext_Jurusan_jurusan_detail(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Jurusan", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createJurusan_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -4201,6 +4299,34 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNewJurusan(ctx context.Context, obj interface{}) (model.NewJurusan, error) {
+	var it model.NewJurusan
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"Jurusan"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "Jurusan":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Jurusan"))
+			it.Jurusan, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj interface{}) (model.NewTodo, error) {
 	var it model.NewTodo
 	asMap := map[string]interface{}{}
@@ -4528,6 +4654,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createTodo(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createJurusan":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createJurusan(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -5355,6 +5490,10 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNJurusan2githubᚗcomᚋmaulana5599ᚋgolangᚑgqlgenᚋmodelsᚐJurusan(ctx context.Context, sel ast.SelectionSet, v models.Jurusan) graphql.Marshaler {
+	return ec._Jurusan(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNJurusan2ᚕᚖgithubᚗcomᚋmaulana5599ᚋgolangᚑgqlgenᚋmodelsᚐJurusanᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Jurusan) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -5569,6 +5708,11 @@ func (ec *executionContext) marshalNLink2ᚖgithubᚗcomᚋmaulana5599ᚋgolang�
 		return graphql.Null
 	}
 	return ec._Link(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNNewJurusan2githubᚗcomᚋmaulana5599ᚋgolangᚑgqlgenᚋgraphᚋmodelᚐNewJurusan(ctx context.Context, v interface{}) (model.NewJurusan, error) {
+	res, err := ec.unmarshalInputNewJurusan(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋmaulana5599ᚋgolangᚑgqlgenᚋgraphᚋmodelᚐNewTodo(ctx context.Context, v interface{}) (model.NewTodo, error) {

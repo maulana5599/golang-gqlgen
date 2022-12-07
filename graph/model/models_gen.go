@@ -9,6 +9,10 @@ type Link struct {
 	User    *User  `json:"user"`
 }
 
+type NewJurusan struct {
+	Jurusan string `json:"Jurusan"`
+}
+
 type NewTodo struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`
